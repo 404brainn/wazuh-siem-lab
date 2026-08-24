@@ -1,14 +1,23 @@
-# Wazuh vs Splunk
+# Wazuh vs Splunk — Portfolio Comparison
 
-Both projects are part of the portfolio, but they demonstrate different analyst workflows.
+These two projects demonstrate different SOC workflows rather than duplicating the same detection scenario.
 
-| Area | Wazuh | Splunk |
+| Area | Wazuh Lab | Splunk Lab |
 |---|---|---|
-| Primary focus in this portfolio | Endpoint security monitoring | Detection engineering and SPL analysis |
-| FIM | Core use case | Not the primary focus |
-| Query language | Wazuh rule / query workflow | SPL |
-| Threat intelligence | VirusTotal enrichment | Not the primary focus |
-| Dashboards | Wazuh Dashboard | Custom Splunk dashboards |
-| Best interview angle | Endpoint visibility and integrated security monitoring | Search, detection logic, alerting and investigation |
+| Primary focus | Endpoint monitoring and threat hunting | SPL-based detection engineering |
+| Endpoint agents | Wazuh Agent on Windows and Kali | Splunk Universal Forwarder / collected telemetry |
+| FIM | Demonstrated | Not the primary use case |
+| Firewall telemetry | Demonstrated | Not the primary use case |
+| Reconnaissance detection | Nmap SYN scan + Wazuh correlation | Separate Splunk TCP port-scan detection |
+| Query / detection workflow | Wazuh rules, event filters, Threat Hunting | SPL searches, reports, alerts |
+| MITRE ATT&CK | T1046 documented for reconnaissance | ATT&CK mapping used in the Splunk project |
+| Dashboards | Wazuh Dashboard / Threat Hunting | Splunk dashboards |
 
-The comparison should be based on observations from the two labs rather than generic product marketing claims.
+## Interview Takeaway
+
+The strongest comparison is not that one SIEM is "better." The portfolio shows that the analyst can work with two different SIEM approaches:
+
+- **Wazuh:** agent-based endpoint telemetry, FIM, firewall log ingestion, correlation, and threat hunting.
+- **Splunk:** structured event search using SPL, detection logic, alerting, and dashboard-driven investigation.
+
+Avoid claiming measured differences in detection latency or query performance unless those metrics were actually tested and recorded.
