@@ -1,35 +1,25 @@
-# Malicious File Detection and Threat Intelligence
+# Threat Intelligence Scope
 
-## Objective
+## Report Status
 
-Use Wazuh endpoint telemetry and VirusTotal enrichment to investigate suspicious file indicators in the controlled laboratory environment.
+The current Wazuh project report does **not** document a completed VirusTotal integration or malicious-file detection workflow. VirusTotal integration is listed under future enhancements.
 
-## Detection Flow
+Therefore, this repository does not claim that VirusTotal-based detection was implemented in the completed lab.
 
-```text
-Suspicious File
-      ↓
- Wazuh Endpoint
-      ↓
- Wazuh Alert / Indicator
-      ↓
-VirusTotal Enrichment
-      ↓
- Analyst Investigation
-```
+## Documented Detection Capabilities
 
-## Analyst Workflow
+The completed project demonstrates:
 
-1. Review the Wazuh alert.
-2. Identify the affected endpoint and file indicator.
-3. Review the available threat-intelligence result.
-4. Determine whether the activity is expected or suspicious.
-5. Document the finding and recommended response.
+- File Integrity Monitoring (FIM)
+- Registry integrity monitoring
+- Windows Firewall telemetry
+- Reconnaissance detection using Wazuh correlation
+- MITRE ATT&CK-based threat hunting
+
+## Future Enhancement
+
+A future version can add threat-intelligence enrichment using VirusTotal, with API credentials stored securely outside the repository.
 
 ## Security Note
 
-API credentials must never be committed to GitHub. Any configuration example in this repository uses placeholders or redacted values.
-
-## Evidence
-
-Add the corresponding threat-intelligence screenshot under `screenshots/`.
+Never commit API keys, passwords, tokens, or other secrets to GitHub.
