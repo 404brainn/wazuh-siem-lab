@@ -1,52 +1,76 @@
-# Wazuh SIEM Security Monitoring Lab
+# Threat-Intelligence Driven SOC Lab Using Wazuh SIEM
 
-A hands-on SOC laboratory built around Wazuh for endpoint security monitoring, File Integrity Monitoring (FIM), authentication monitoring, custom detection rules, threat-intelligence enrichment, and MITRE ATT&CK-based investigation.
+A hands-on Security Operations Center (SOC) and threat-hunting laboratory built with Wazuh, Windows 11, Ubuntu Server, and Kali Linux. The project demonstrates centralized endpoint monitoring, File Integrity Monitoring (FIM), Windows Firewall telemetry analysis, reconnaissance detection, SIEM event correlation, and MITRE ATT&CK-based threat hunting.
 
-## Lab Overview
+## Lab Environment
 
-The documented environment uses:
-
-- Wazuh Manager
-- Wazuh Dashboard
-- Wazuh Agent
-- Windows endpoint
-- Kali Linux
-- VirusTotal threat-intelligence integration
-
-The project focuses on collecting endpoint telemetry, detecting security-relevant events, validating alerts, and investigating activity from a SOC analyst perspective.
+| System | Role |
+|---|---|
+| Ubuntu Server | Wazuh Manager / SIEM |
+| Windows 11 | Monitored endpoint / Wazuh Agent |
+| Kali Linux | Attacker / reconnaissance simulation |
 
 ## Architecture
 
 ```text
-Kali Linux / Attack Simulation
-            |
-            v
-      Windows Endpoint
-       + Wazuh Agent
-            |
-            v
-       Wazuh Manager
-            |
-      +-----+-----+
-      |           |
- Wazuh Dashboard  Threat Intelligence
-                    |
-                 VirusTotal
+Kali Linux (Attacker)
+        |
+        v
+Windows 11 Endpoint (Wazuh Agent)
+        |
+        v
+Ubuntu Wazuh Manager
+        |
+        v
+Wazuh Dashboard / Threat Hunting
 ```
 
-See [`architecture/`](architecture/) for the documented lab architecture.
+## What Was Actually Implemented
 
-## Core Use Cases
+- Wazuh Manager, Dashboard, and Indexer deployment
+- Windows 11 and Kali Linux agent integration
+- File Integrity Monitoring for a controlled Windows directory
+- Registry integrity monitoring
+- Windows Firewall telemetry ingestion
+- Nmap SYN-scan simulation from Kali Linux
+- Wazuh correlation rule validation for repeated firewall drop events
+- MITRE ATT&CK threat hunting and event mapping
 
-| Use Case | Security Goal |
-|---|---|
-| File Integrity Monitoring | Detect unauthorized file changes |
-| Authentication Monitoring | Identify suspicious login activity |
-| Custom Wazuh Rules | Convert security events into actionable alerts |
-| Threat Intelligence | Enrich suspicious file indicators with VirusTotal |
-| MITRE ATT&CK Mapping | Classify observed activity for investigation |
+## Detection Use Cases
 
-## Detection Engineering Workflow
+### 1. File Integrity Monitoring
+
+Monitored `C:\Users\Public` for unauthorized file changes and validated checksum and registry-integrity alerts.
+
+Observed rule IDs in the lab included **594**, **750**, and **550**.
+
+### 2. Windows Firewall Telemetry
+
+Configured Wazuh to ingest:
+
+```text
+C:\Windows\System32\LogFiles\Firewall\pfirewall.log
+```
+
+The firewall telemetry was used to identify suspicious network activity.
+
+### 3. Network Scan Detection
+
+Simulated reconnaissance from Kali Linux with:
+
+```bash
+nmap -sS 192.168.1.70
+```
+
+Wazuh generated a correlated firewall detection using **Rule ID 4151**, identifying multiple firewall drop events from the same source.
+
+### 4. MITRE ATT&CK Threat Hunting
+
+Used the Wazuh Threat Hunting module to investigate alerts, analyze correlated events, identify attack patterns, and map detections to ATT&CK techniques.
+
+The report explicitly documents **T1046 – Network Service Scanning** for the reconnaissance scenario.
+
+## Detection Workflow
 
 ```text
 Endpoint / Attack Activity
@@ -55,20 +79,39 @@ Endpoint / Attack Activity
           ↓
       Wazuh Manager
           ↓
- Rule / Decoder / FIM Event
+   FIM / Firewall Rules
           ↓
-       Alerting
+    Alert Correlation
           ↓
- Threat Intelligence Enrichment
-          ↓
- Analyst Investigation
+ Threat Hunting Investigation
           ↓
  MITRE ATT&CK Mapping
 ```
 
-## Project Evidence
+## Evidence
 
-The repository separates detection logic, configuration examples, screenshots, and the complete project report so the implementation can be reviewed without relying only on the PDF.
+Screenshots extracted from the project report are stored under [`screenshots/`](screenshots/). They include agent connectivity, FIM alerts, firewall/reconnaissance detection, MITRE ATT&CK hunting results, and implementation challenges.
+
+## Challenges Demonstrated
+
+The report documents practical troubleshooting of:
+
+- Agent version mismatch
+- Kali agent connectivity problems
+- Missing firewall telemetry
+- XML `localfile` configuration errors
+
+## Wazuh vs Splunk
+
+This project is intentionally different from the Splunk lab. Wazuh demonstrates endpoint-centric monitoring, FIM, integrated agent visibility, firewall telemetry, rule-based correlation, and threat hunting. The Splunk project demonstrates SPL-driven detection engineering, search, dashboards, and alert workflows.
+
+## Security Note
+
+This repository contains only redacted configuration examples. Never commit passwords, API keys, tokens, private keys, or production configuration secrets. All attack simulations were performed in a controlled lab against systems used for authorized testing.
+
+## Project Report
+
+[View the complete Wazuh project report](reports/WAZUH-Project-Report.pdf)
 
 ## Repository Structure
 
@@ -84,16 +127,6 @@ The repository separates detection logic, configuration examples, screenshots, a
 └── README.md
 ```
 
-## Security Notes
-
-- Configuration examples must contain placeholders rather than real API keys, passwords, or tokens.
-- The laboratory was designed for controlled security testing and learning.
-- Attack simulations should only be performed against systems you own or are explicitly authorized to test.
-
-## Project Report
-
-The complete project report is available under [`reports/`](reports/).
-
 ## Author
 
-**Ibrahim Khaleel**
+**Ibrahim Khaleel M**
