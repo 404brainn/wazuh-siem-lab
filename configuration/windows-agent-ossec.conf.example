@@ -1,0 +1,26 @@
+<!-- Sanitized example for the Windows Wazuh agent. -->
+<ossec_config>
+  <client>
+    <server>
+      <address>&lt;WAZUH_MANAGER_IP&gt;</address>
+      <port>1514</port>
+      <protocol>tcp</protocol>
+    </server>
+  </client>
+
+  <syscheck>
+    <disabled>no</disabled>
+    <frequency>43200</frequency>
+    <directories check_all="yes">C:\Users\Public</directories>
+  </syscheck>
+
+  <localfile>
+    <location>Security</location>
+    <log_format>eventchannel</log_format>
+  </localfile>
+
+  <localfile>
+    <location>C:\Windows\System32\LogFiles\Firewall\pfirewall.log</location>
+    <log_format>syslog</log_format>
+  </localfile>
+</ossec_config>
