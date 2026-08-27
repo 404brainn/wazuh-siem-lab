@@ -1,28 +1,12 @@
 # Configuration Examples
 
-This directory contains sanitized configuration examples based on the completed lab.
+This folder contains the configuration examples I used as a reference for the lab.
 
 ## Files
 
-- `windows-agent-ossec.conf.example` — Windows Wazuh agent example showing manager connectivity, Security Event collection, FIM for `C:\Users\Public`, and firewall log ingestion.
-- `firewall-localfile.xml` — Minimal `localfile` example for collecting `pfirewall.log`.
+- `windows-agent-ossec.conf.example` — Windows agent configuration for manager connectivity, Security events, FIM for `C:\Users\Public`, and firewall log collection.
+- `firewall-localfile.xml` — Example for reading the Windows `pfirewall.log` file.
 
-## Safe Publishing Rules
+The files are sanitized before publishing. Sensitive values such as passwords, API keys, tokens, and private keys should not be committed to the repository.
 
-Never commit:
-
-- API keys
-- Passwords
-- Authentication tokens
-- Private keys
-- Production secrets
-
-Use placeholders such as:
-
-```text
-<WAZUH_MANAGER_IP>
-<API_KEY>
-<AGENT_NAME>
-```
-
-These examples are for documentation and lab reproduction. Validate configuration syntax and test in an isolated environment before use.
+Replace placeholders with your own lab values and test the configuration before using it.
