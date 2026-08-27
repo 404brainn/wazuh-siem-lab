@@ -1,16 +1,20 @@
 # Evidence Screenshots
 
-This directory stores screenshots captured from the completed lab.
+This directory contains screenshots captured from the completed Wazuh SOC lab. Each image supports a specific documented detection or monitoring result.
 
-## Recommended Files
+## Evidence Files
 
-- `01-agent-connectivity.png` — Wazuh agents connected and reporting.
-- `02-fim-alerts.png` — File or registry integrity alerts observed in Wazuh.
-- `03-network-scan-detection.png` — Rule 4151 correlated firewall-drop alert.
-- `04-mitre-threat-hunting.png` — MITRE ATT&CK mapping in the Wazuh Threat Hunting interface.
+| File | Evidence |
+|---|---|
+| `01-agent-status.png` | Wazuh Endpoints view showing Kali and Windows agents active |
+| `02-mitre-account-events.png` | MITRE ATT&CK view showing account-related activity, including T1098/T1484 context |
+| `03-mitre-authentication-events.png` | MITRE ATT&CK view showing repeated logon-failure activity and Rule 60122 |
+| `04-fim-alerts.png` | Wazuh Threat Hunting view showing integrity-related alerts (Rules 550, 594 and 750) |
+| `05-firewall-rule-4151.png` | Firewall search showing Rule 4151, level 10 |
+| `06-mitre-threat-hunting.png` | Wazuh Threat Hunting view used for MITRE ATT&CK investigation |
 
 ## Evidence Standard
 
-Each screenshot should support a specific claim made in the README or detection documentation. Avoid screenshots that expose passwords, API keys, tokens, or other secrets.
+Each screenshot should support a specific claim made in the project report or detection documentation. Avoid screenshots that expose passwords, API keys, tokens, private keys, or other secrets.
 
-Do not add placeholder images. If evidence for a use case is not available, describe the limitation instead of presenting an unsupported result.
+The repository documents completed functionality only. VirusTotal enrichment, Sysmon integration, custom detection rules, and automated containment are future enhancements and are not represented as completed evidence.
