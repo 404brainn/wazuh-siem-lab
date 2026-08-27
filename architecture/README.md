@@ -1,17 +1,33 @@
-# Wazuh Lab Architecture
+# Wazuh SOC Lab Architecture
 
-The completed lab follows an endpoint-to-manager monitoring model documented in the project report:
+![Wazuh SOC Lab Architecture](wazuh-soc-architecture.svg)
+
+The completed lab uses three systems with two distinct flows.
+
+## Attack Flow
 
 ```text
-Kali Linux (Attacker)
-        ↓
-Windows 11 Endpoint (Wazuh Agent)
-        ↓
-Ubuntu Wazuh Manager
-        ↓
-Wazuh Dashboard / Threat Hunting
+Kali Linux → Controlled Nmap reconnaissance → Windows 11 endpoint
 ```
 
-The lab uses Kali Linux for controlled reconnaissance simulation, Windows 11 as the monitored endpoint, and Ubuntu Server as the Wazuh Manager/SIEM.
+Kali Linux was used only to generate authorized test activity against the monitored Windows endpoint.
 
-The report does not document a completed external threat-intelligence enrichment stage, so VirusTotal is not shown as part of the completed architecture.
+## Security Telemetry Flow
+
+```text
+Windows Wazuh Agent ─┐
+                     ├→ Wazuh Manager → Wazuh Indexer → Dashboard / Threat Hunting
+Kali Wazuh Agent ────┘
+```
+
+The Windows endpoint provided Security Event, integrity-monitoring, and Windows Firewall telemetry. The Wazuh Manager processed events and correlation rules, while the Indexer and Dashboard were used for search, alert review, and threat hunting.
+
+## Lab Systems
+
+| System | Role | IP Address |
+|---|---|---:|
+| Ubuntu Server | Wazuh Manager / SIEM | `192.168.1.74` |
+| Windows 11 | Monitored endpoint | `192.168.1.70` |
+| Kali Linux | Controlled attack simulation | `192.168.1.71` |
+
+VirusTotal enrichment, Sysmon integration, custom rules, and automated response were not part of the completed architecture and are therefore not shown as implemented components.
