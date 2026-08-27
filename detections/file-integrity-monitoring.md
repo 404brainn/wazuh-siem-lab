@@ -1,37 +1,33 @@
 # File Integrity Monitoring (FIM)
 
-## Objective
+I used Wazuh FIM to watch for changes in selected files and directories.
 
-Detect unauthorized or unexpected changes to monitored files and directories using Wazuh File Integrity Monitoring.
-
-## Detection Flow
+## What Happens
 
 ```text
-Monitored File
+File change
     ↓
 Wazuh Agent
     ↓
-FIM Event
+FIM event
     ↓
 Wazuh Manager
     ↓
 Alert
-    ↓
-Analyst Investigation
 ```
 
-## Analyst Checks
+## What I Checked
 
-- Which file changed?
-- Which endpoint generated the event?
-- What changed and when?
-- Was the change expected?
-- Is the affected file associated with suspicious activity?
+When an integrity alert appeared, I checked:
+
+- Which file or registry item changed
+- Which endpoint reported it
+- When the change happened
+- Whether the change was expected
+- Whether there were other related events
+
+An integrity alert does not automatically mean the system was compromised. It is a starting point for investigation.
 
 ## Evidence
 
-Add the corresponding Wazuh FIM screenshot under `screenshots/`.
-
-## Security Value
-
-FIM provides visibility into file modifications that may indicate unauthorized configuration changes, tampering, persistence activity, or other endpoint compromise indicators.
+The related screenshot is available in the `screenshots` folder as `04-fim-alerts.png`.
