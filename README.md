@@ -1,117 +1,117 @@
-# Threat-Intelligence Driven SOC Lab Using Wazuh SIEM
+# Wazuh-Based Security Monitoring and Threat Hunting SOC Lab
 
-A hands-on Security Operations Center (SOC) and threat-hunting laboratory built with Wazuh, Windows 11, Ubuntu Server, and Kali Linux. The project demonstrates centralized endpoint monitoring, File Integrity Monitoring (FIM), Windows Firewall telemetry analysis, reconnaissance detection, SIEM event correlation, and MITRE ATT&CK-based threat hunting.
+A hands-on Security Operations Center (SOC) laboratory built with Wazuh, Ubuntu Server, Windows 11, and Kali Linux. The project demonstrates centralized endpoint monitoring, File Integrity Monitoring (FIM), Windows Firewall telemetry analysis, reconnaissance detection, event correlation, and MITRE ATT&CK-based threat hunting.
+
+> All testing was performed in a controlled private lab against systems used for authorized testing.
 
 ## Lab Environment
 
-| System | Role |
-|---|---|
-| Ubuntu Server | Wazuh Manager / SIEM |
-| Windows 11 | Monitored endpoint / Wazuh Agent |
-| Kali Linux | Attacker / reconnaissance simulation |
+| System | Role | IP Address |
+|---|---|---:|
+| Ubuntu Server | Wazuh Manager / SIEM | `192.168.1.74` |
+| Windows 11 | Monitored endpoint / Wazuh Agent | `192.168.1.70` |
+| Kali Linux | Attack simulation + Wazuh Agent | `192.168.1.71` |
 
 ## Architecture
 
+### Attack flow
+
 ```text
-Kali Linux (Attacker)
-        |
-        v
-Windows 11 Endpoint (Wazuh Agent)
-        |
-        v
-Ubuntu Wazuh Manager
-        |
-        v
-Wazuh Dashboard / Threat Hunting
+Kali Linux
+     │ Nmap / controlled traffic
+     ▼
+Windows 11 Endpoint
 ```
 
-## What Was Actually Implemented
+### Security telemetry flow
+
+```text
+Windows 11 Agent ─────┐
+                      ├──> Wazuh Manager ──> Wazuh Indexer ──> Dashboard
+Kali Linux Agent ─────┘                                      Threat Hunting
+```
+
+## What Was Implemented
 
 - Wazuh Manager, Dashboard, and Indexer deployment
 - Windows 11 and Kali Linux agent integration
 - File Integrity Monitoring for a controlled Windows directory
 - Registry integrity monitoring
+- Windows Security Event monitoring
 - Windows Firewall telemetry ingestion
-- Nmap SYN-scan simulation from Kali Linux
-- Wazuh correlation rule validation for repeated firewall drop events
-- MITRE ATT&CK threat hunting and event mapping
+- Controlled Nmap SYN-scan simulation from Kali Linux
+- Wazuh correlation validation for repeated firewall drop events
+- MITRE ATT&CK-based threat hunting and event classification
 
 ## Detection Use Cases
 
-### 1. File Integrity Monitoring
+### File and Registry Integrity Monitoring
 
-Monitored `C:\Users\Public` for unauthorized file changes and validated checksum and registry-integrity alerts.
+Monitored `C:\Users\Public` and observed integrity-related alerts, including:
 
-Observed rule IDs in the lab included **594**, **750**, and **550**.
+- Rule **550** — Integrity checksum changed
+- Rule **594** — Registry key integrity checksum changed
+- Rule **750** — Registry value integrity checksum changed
 
-### 2. Windows Firewall Telemetry
+Integrity alerts were treated as investigation leads and validated with endpoint context rather than automatically classified as malicious.
 
-Configured Wazuh to ingest:
+### Windows Account and Authentication Monitoring
 
-```text
-C:\Windows\System32\LogFiles\Firewall\pfirewall.log
-```
+- Windows Event ID **4720** for local account creation
+- Windows Event ID **4625** for failed logon activity
+- Observed Wazuh Rule **60122** for logon-failure activity
 
-The firewall telemetry was used to identify suspicious network activity.
+### Network Scan Detection
 
-### 3. Network Scan Detection
-
-Simulated reconnaissance from Kali Linux with:
+A controlled SYN scan was performed from Kali Linux against the Windows endpoint:
 
 ```bash
 nmap -sS 192.168.1.70
 ```
 
-Wazuh generated a correlated firewall detection using **Rule ID 4151**, identifying multiple firewall drop events from the same source.
-
-### 4. MITRE ATT&CK Threat Hunting
-
-Used the Wazuh Threat Hunting module to investigate alerts, analyze correlated events, identify attack patterns, and map detections to ATT&CK techniques.
-
-The report explicitly documents **T1046 – Network Service Scanning** for the reconnaissance scenario.
-
-## Detection Workflow
+Windows Firewall telemetry was ingested from:
 
 ```text
-Endpoint / Attack Activity
-          ↓
-      Wazuh Agent
-          ↓
-      Wazuh Manager
-          ↓
-   FIM / Firewall Rules
-          ↓
-    Alert Correlation
-          ↓
- Threat Hunting Investigation
-          ↓
- MITRE ATT&CK Mapping
+C:\Windows\System32\LogFiles\Firewall\pfirewall.log
 ```
 
-## Evidence
+Wazuh correlated repeated firewall-drop events and generated:
 
-Screenshots extracted from the project report are stored under [`screenshots/`](screenshots/). They include agent connectivity, FIM alerts, firewall/reconnaissance detection, MITRE ATT&CK hunting results, and implementation challenges.
+| Rule ID | Description | Level |
+|---|---|---:|
+| **4151** | Multiple Firewall drop events from same source | **10** |
 
-## Challenges Demonstrated
+This demonstrates correlation: multiple underlying events can contribute to one higher-level alert instead of generating a separate alert for every packet.
 
-The report documents practical troubleshooting of:
+## MITRE ATT&CK Threat Hunting
 
-- Agent version mismatch
-- Kali agent connectivity problems
-- Missing firewall telemetry
-- XML `localfile` configuration errors
+The reconnaissance scenario was classified as:
 
-## Wazuh vs Splunk
+**T1046 — Network Service Discovery**
 
-This project is intentionally different from the Splunk lab. Wazuh demonstrates endpoint-centric monitoring, FIM, integrated agent visibility, firewall telemetry, rule-based correlation, and threat hunting. The Splunk project demonstrates SPL-driven detection engineering, search, dashboards, and alert workflows.
+The Wazuh Threat Hunting interface was used to review alerts, event context, severity, related activity, and ATT&CK classifications.
 
-## Security Note
+## Troubleshooting Demonstrated
 
-This repository contains only redacted configuration examples. Never commit passwords, API keys, tokens, private keys, or production configuration secrets. All attack simulations were performed in a controlled lab against systems used for authorized testing.
+| Challenge | Resolution |
+|---|---|
+| Agent version mismatch | Upgraded the Wazuh Manager stack to 4.14.5 |
+| Kali agent connectivity | Corrected communication settings and verified TCP/1514 |
+| Missing firewall telemetry | Enabled Windows Firewall logging and configured `localfile` ingestion |
+| XML configuration errors | Corrected the configuration syntax and restarted the agent |
 
-## Project Report
+## Project Scope and Limitations
 
-[View the complete Wazuh project report](reports/WAZUH-Project-Report.pdf)
+This project demonstrates **detection, investigation, correlation and threat hunting**.
+
+The following were **not implemented** and are planned as future enhancements:
+
+- Sysmon integration
+- VirusTotal enrichment
+- Custom Wazuh detection rules
+- Automated containment or response
+
+Production deployments would also require additional rule tuning and contextual analysis to reduce false positives and alert fatigue.
 
 ## Repository Structure
 
@@ -122,10 +122,14 @@ This repository contains only redacted configuration examples. Never commit pass
 ├── configuration/
 ├── detections/
 ├── reports/
+│   └── WAZUH-Project-Report.md
 ├── rules/
-├── screenshots/
 └── README.md
 ```
+
+## Security Note
+
+No passwords, API keys, tokens, private keys, or production secrets should be committed to this repository. Any examples involving credentials should use placeholders only.
 
 ## Author
 
