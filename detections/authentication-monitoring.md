@@ -1,35 +1,33 @@
 # Authentication Monitoring
 
-## Objective
+This part of the lab focused on Windows account and logon events collected by Wazuh.
 
-Monitor authentication-related events collected by Wazuh and identify activity that requires analyst investigation.
-
-## Detection Flow
+## Event Flow
 
 ```text
-Authentication Event
-        ↓
-    Wazuh Agent
-        ↓
-   Wazuh Manager
-        ↓
-      Alert
-        ↓
- Analyst Investigation
+Windows event
+    ↓
+Wazuh Agent
+    ↓
+Wazuh Manager
+    ↓
+Alert
+    ↓
+Investigation
 ```
 
-## Investigation Questions
+## What I Looked At
 
-- Which endpoint generated the event?
-- Which account was involved?
-- Was the activity successful or failed?
-- Does the source or timing look unusual?
-- Are there related events before or after the authentication event?
+For an authentication-related alert, I checked:
+
+- The endpoint that generated the event
+- The account involved
+- Whether the logon succeeded or failed
+- The source and time of the activity
+- Other events around the same time
+
+I used the events as investigation data rather than treating every failed logon as an attack.
 
 ## Evidence
 
-Add the corresponding authentication-monitoring screenshot under `screenshots/`.
-
-## Security Value
-
-Authentication monitoring provides a foundation for identifying suspicious account activity and correlating endpoint events during incident investigation.
+The screenshots `02-mitre-account-events.png` and `03-mitre-authentication-events.png` show the account and authentication-related events reviewed in Wazuh.
