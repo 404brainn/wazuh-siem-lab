@@ -1,21 +1,21 @@
-# Future Enhancements
+# Future Work
 
-The following capabilities were **not implemented in the completed lab**. They are documented as future work only.
+There are a few things I would like to add to this lab later.
 
-## Sysmon Integration
+## Sysmon
 
-Add Sysmon telemetry to improve Windows endpoint visibility for process creation, network connections, file activity, and other endpoint events.
+Adding Sysmon would provide more detailed Windows telemetry, especially for process creation and network activity.
 
-## Threat-Intelligence Enrichment
+## Threat Intelligence
 
-Evaluate enrichment with VirusTotal or another approved threat-intelligence source. API credentials must be stored securely and never committed to the repository.
+I would like to test enrichment using VirusTotal or another threat-intelligence source. Any API keys would be stored securely and kept out of the repository.
 
-## Custom Wazuh Rules
+## Custom Rules
 
-Develop and test custom rules for lab-specific detection logic, including documented false-positive considerations and justified MITRE ATT&CK mappings.
+Another improvement would be writing custom Wazuh rules for specific lab scenarios and testing them for false positives.
 
 ## Automated Response
 
-Evaluate controlled active-response or containment workflows after defining safeguards to prevent unintended disruption.
+I would also like to explore controlled response actions after defining proper safeguards to avoid affecting the system unexpectedly.
 
-These enhancements are intentionally separated from the completed project so that the repository does not claim functionality that was not implemented.
+These are ideas for improving the lab and were not implemented in the current version.
