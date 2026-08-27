@@ -1,148 +1,136 @@
 # Wazuh-Based Security Monitoring and Threat Hunting SOC Lab
 
-A hands-on Security Operations Center (SOC) laboratory built with Wazuh, Ubuntu Server, Windows 11, and Kali Linux. The project demonstrates centralized endpoint monitoring, File Integrity Monitoring (FIM), Windows Firewall telemetry analysis, reconnaissance detection, event correlation, and MITRE ATT&CK-based threat hunting.
+This is a small, hands-on SOC lab I built to learn how Wazuh works in a real monitoring setup. I used Ubuntu Server as the Wazuh server, Windows 11 as the main monitored endpoint, and Kali Linux for controlled attack testing and Linux telemetry.
 
-> All testing was performed in a controlled private lab against systems used for authorized testing.
+The lab covers endpoint monitoring, File Integrity Monitoring (FIM), Windows Security events, Windows Firewall logs, Nmap scan detection, alert correlation, and MITRE ATT&CK-based investigation.
+
+> All testing was carried out in a private lab using systems available to me for authorized testing.
 
 ## Project Report
 
-- [Detailed Markdown Report](reports/WAZUH-Project-Report.md)
-- [Project Report PDF](reports/WAZUH_Project_Report.pdf)
+- [Detailed report](reports/WAZUH-Project-Report.md)
+- [Project report PDF](reports/WAZUH_Project_Report.pdf)
 
-## Lab Environment
+## Lab Setup
 
 | System | Role | IP Address | Version |
 |---|---|---:|---|
 | Ubuntu Server | Wazuh Manager / SIEM | `192.168.1.74` | Wazuh 4.14.5 |
 | Windows 11 | Monitored endpoint / Wazuh Agent | `192.168.1.70` | Wazuh Agent 4.7.5 |
-| Kali Linux | Attack simulation / Wazuh Agent | `192.168.1.71` | Wazuh Agent 4.14.5 |
+| Kali Linux | Attack testing / Wazuh Agent | `192.168.1.71` | Wazuh Agent 4.14.5 |
 
-## Architecture
+## How the Lab Works
+
+**Attack traffic:**
+
+```text
+Kali Linux → Nmap / controlled traffic → Windows 11
+```
+
+**Security telemetry:**
+
+```text
+Windows Wazuh Agent ─┐
+                     ├→ Wazuh Manager → Wazuh Indexer → Dashboard / Threat Hunting
+Kali Wazuh Agent ────┘
+```
+
+Kali was used to generate controlled reconnaissance traffic. The Wazuh agents collected endpoint activity and sent it to the manager, where the events were processed and correlated before being reviewed in the dashboard.
 
 ![Wazuh SOC Lab Architecture](architecture/wazuh-soc-architecture.svg)
 
-The architecture separates **attack traffic** from **security telemetry**. Kali Linux generates controlled reconnaissance traffic against the Windows endpoint, while Wazuh agents forward endpoint telemetry to the Wazuh Manager for processing, indexing, investigation, and threat hunting.
+[Architecture notes](architecture/README.md)
 
-See [architecture documentation](architecture/README.md) for additional details.
+## What I Set Up
 
-## What Was Implemented
+- Wazuh Manager, Indexer, and Dashboard on Ubuntu Server
+- Wazuh Agent on Windows 11
+- Wazuh Agent on Kali Linux
+- FIM for `C:\Users\Public`
+- Windows Security Event collection
+- Windows Firewall log collection from `pfirewall.log`
+- Controlled Nmap SYN scans from Kali
+- MITRE ATT&CK review through Wazuh Threat Hunting
 
-- Wazuh Manager, Indexer, and Dashboard deployment
-- Windows 11 and Kali Linux agent integration
-- File Integrity Monitoring for a controlled Windows directory
-- Registry integrity monitoring
-- Windows Security Event monitoring
-- Windows Firewall telemetry ingestion
-- Controlled Nmap SYN-scan simulation from Kali Linux
-- Wazuh correlation validation for repeated firewall-drop events
-- MITRE ATT&CK-based threat hunting and event classification
+## Detection Tests
 
-## Detection Use Cases
+### File and Registry Integrity
 
-### File and Registry Integrity Monitoring
+I monitored `C:\Users\Public` and reviewed the integrity events produced during testing. The dashboard showed Rules **550**, **594**, and **750** for integrity-related activity.
 
-Monitored `C:\Users\Public` and observed integrity-related alerts, including:
+The registry events were treated as investigation leads. A registry change by itself does not prove persistence or compromise, because normal Windows activity can also change registry data.
 
-- Rule **550** — Integrity checksum changed
-- Rule **594** — Registry key integrity checksum changed
-- Rule **750** — Registry value integrity checksum changed
+[View FIM notes](detections/file-integrity-monitoring.md)
 
-Integrity alerts were treated as investigation leads and validated with endpoint context rather than automatically classified as malicious.
+### Account and Authentication Monitoring
 
-See [FIM detection notes](detections/file-integrity-monitoring.md).
+I tested local account creation and failed logons using Windows Security events:
 
-### Windows Account and Authentication Monitoring
+- Event ID **4720** — user account created
+- Event ID **4625** — failed logon
+- Rule **60122** — observed for logon-failure activity
 
-- Windows Event ID **4720** for local account creation
-- Windows Event ID **4625** for failed logon activity
-- Wazuh Rule **60122** observed for logon-failure activity
+[View authentication notes](detections/authentication-monitoring.md)
 
-See [authentication monitoring notes](detections/authentication-monitoring.md).
+### Nmap Scan Detection
 
-### Network Scan Detection
-
-A controlled SYN scan was performed from Kali Linux against the Windows endpoint:
+From Kali I ran:
 
 ```bash
 nmap -sS 192.168.1.70
 ```
 
-Windows Firewall telemetry was collected from:
+Windows Firewall logging was collected from:
 
 ```text
 C:\Windows\System32\LogFiles\Firewall\pfirewall.log
 ```
 
-Wazuh correlated repeated firewall-drop events and generated:
+Wazuh correlated repeated firewall-drop events and produced:
 
-| Rule ID | Description | Level |
+| Rule | Description | Level |
 |---|---|---:|
 | **4151** | Multiple Firewall drop events from same source | **10** |
 
-A correlated alert can represent multiple underlying firewall events, so multiple scans do not necessarily produce one high-level alert per scan.
+One high-level Rule 4151 alert can represent several underlying firewall events, so running several scans does not necessarily mean one Rule 4151 alert for each scan.
 
-See [network scan detection notes](detections/network-scan-detection.md).
+[View the network scan detection notes](detections/network-scan-detection.md)
 
-## Detection → Investigation → Response Workflow
+## My Investigation Process
 
-1. **Detect** — Wazuh agents collect endpoint, integrity, authentication, and firewall telemetry.
-2. **Investigate** — Review the affected endpoint, source, timestamp, rule ID, severity, and related events.
-3. **Validate** — Determine whether the activity is expected lab activity or requires escalation.
-4. **Respond** — Record findings and apply containment or remediation when justified. Automated response was not implemented in this lab.
+When an alert appeared, I checked the endpoint, timestamp, source information, rule ID, severity, and nearby events. I then compared the activity with the expected lab action and used MITRE ATT&CK as additional context.
 
-## MITRE ATT&CK Threat Hunting
+For a real production alert, the next step would depend on the evidence. That could include blocking a source, disabling an unauthorized account, resetting credentials, isolating a host, or escalating the incident. I did not run automated containment in this lab.
 
-The reconnaissance scenario was reviewed in the context of:
+## Troubleshooting
 
-**T1046 — Network Service Discovery**
+A useful part of this project was fixing the problems that came up during setup.
 
-The Wazuh Threat Hunting interface was used to review event context, severity, related activity, and ATT&CK classifications.
-
-## Evidence
-
-The repository contains an evidence guide in [`screenshots/`](screenshots/README.md). Add only screenshots that directly support a documented claim.
-
-Recommended evidence:
-
-- Agent connectivity
-- Integrity alerts
-- Rule 4151 firewall correlation alert
-- MITRE ATT&CK Threat Hunting view
-
-## Troubleshooting Demonstrated
-
-| Challenge | Resolution |
-|---|---|
-| Agent version mismatch | Upgraded the Wazuh Manager stack to 4.14.5 |
-| Kali agent connectivity | Corrected communication settings and verified TCP/1514 |
-| Missing firewall telemetry | Enabled Windows Firewall logging and configured `localfile` ingestion |
-| XML configuration errors | Corrected the configuration syntax and restarted the agent |
+- The Kali agent was initially trying to reach the manager on TCP/5601. I corrected the agent configuration to use TCP/1514.
+- The Kali 4.14.5 agent could not register with the older manager, so I upgraded the Wazuh server stack to 4.14.5.
+- Windows Firewall events were missing until firewall logging and the Wazuh `localfile` configuration were corrected.
+- An XML configuration error stopped log collection until the syntax was fixed and the agent restarted.
 
 ## Configuration Examples
 
-Sanitized examples are available under [`configuration/`](configuration/README.md):
+I included sanitized configuration examples under [`configuration/`](configuration/README.md). They use placeholders and do not contain credentials or API keys.
 
-- Windows agent configuration example
-- Windows Firewall `localfile` ingestion example
+## Evidence
 
-No credentials, tokens, API keys, or production secrets are included.
+The [`screenshots/`](screenshots/) folder contains the screenshots captured from the lab. The screenshot guide explains what each image shows and which part of the project it supports.
 
-## Project Scope and Limitations
+## What Is Not Part of the Completed Lab
 
-This project demonstrates **detection, investigation, correlation, and threat hunting**.
-
-The following were **not implemented** and are documented as future work:
+I have not claimed the following as completed features:
 
 - Sysmon integration
 - VirusTotal or other threat-intelligence enrichment
 - Custom Wazuh detection rules
-- Automated containment or response
+- Automated containment / active response
 
-See [`future-work/`](future-work/README.md) for the planned roadmap.
+They are listed separately as future work.
 
-The `rules/` directory documents that this completed lab relied on Wazuh's existing detection and correlation capabilities; custom rules were not claimed as implemented.
-
-## Repository Structure
+## Repository Layout
 
 ```text
 .
@@ -164,14 +152,11 @@ The `rules/` directory documents that this completed lab relied on Wazuh's exist
 │   ├── WAZUH-Project-Report.md
 │   └── WAZUH_Project_Report.pdf
 ├── rules/
+│   └── README.md
 ├── screenshots/
 │   └── README.md
 └── README.md
 ```
-
-## Security Note
-
-No passwords, API keys, tokens, private keys, or production secrets should be committed to this repository. Configuration examples use placeholders where appropriate.
 
 ## Author
 
