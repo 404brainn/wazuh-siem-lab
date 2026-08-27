@@ -1,0 +1,5 @@
+<!-- Sanitized example for Windows Firewall log ingestion. -->
+<localfile>
+  <location>C:\Windows\System32\LogFiles\Firewall\pfirewall.log</location>
+  <log_format>syslog</log_format>
+</localfile>
